@@ -8,4 +8,5 @@ from utils.api.yandex.info_def import get_country_list
 def get_counties(message: Message) -> None:
     stations = get_all_stations()
     countries = get_country_list(stations)
+    countries = sorted(countries)
     bot.send_message(message.from_user.id, '\n'.join(countries))

@@ -23,7 +23,7 @@ def set_transport(message: Message) -> None:
 @bot.message_handler(state=HelpState.transport)
 def show_stations(message: Message) -> None:
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-        if message.text.lower() == 'самолет':
+        if message.text.lower() == 'самолет' or message.text.lower() == 'самолёт':
             data['transport_type'] = 'plane'
         elif message.text.lower() == 'поезд':
             data['transport_type'] = 'train'

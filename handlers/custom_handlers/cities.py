@@ -16,6 +16,7 @@ def show_cities(message: Message) -> None:
     stations = get_all_stations()
     cities = get_city_list(stations, message.text)
     if cities:
+        cities = sorted(cities)
         bot.send_message(message.from_user.id, '\n'.join(cities))
         bot.delete_state(message.from_user.id)
     else:

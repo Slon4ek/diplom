@@ -16,6 +16,7 @@ def show_regions(message: Message) -> None:
     stations = get_all_stations()
     regions = get_region_list(stations, message.text)
     if regions:
+        regions = sorted(regions)
         bot.send_message(message.from_user.id, '\n'.join(regions))
         bot.delete_state(message.from_user.id)
     else:
