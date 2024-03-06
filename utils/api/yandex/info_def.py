@@ -17,7 +17,7 @@ def get_region_list(obj: Dict, country_name: str) -> List:
     :param country_name: str
     :return: List
     """
-    if country_name in obj.values():
+    if country_name in obj.values() and 'regions' in obj.keys():
         return [region['title'] for region in obj['regions'] if region['title']]
     else:
         for value in obj.values():
@@ -37,7 +37,7 @@ def get_city_list(obj: Dict, region_name: str) -> List:
     :param region_name: название региона
     :return: список городов
     """
-    if region_name in obj.values():
+    if region_name in obj.values() and 'settlements' in obj.keys():
         return [city['title'] for city in obj['settlements'] if city['title']]
     else:
         for value in obj.values():
@@ -60,7 +60,7 @@ def get_station_list(obj: Dict, city_name: str, transport_type: str | None = Non
     :param transport_type: название транспорта(необязательный параметр)
     :return: список станций
     """
-    if city_name in obj.values():
+    if city_name in obj.values() and 'stations' in obj.keys():
         if transport_type:
             station_dict = dict()
             stations_list = [{'Станция': station['title'], 'Код станции': station['codes']['yandex_code']}
