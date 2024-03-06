@@ -1,1 +1,3 @@
-from . import contact
+from . import (contact,
+               location,
+               transport_choice)
