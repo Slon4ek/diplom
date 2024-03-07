@@ -1,9 +1,10 @@
-from telebot.types import Message
+from telebot.types import Message, ReplyKeyboardRemove
+
 from config_data.api_config import get_all_stations
+from keyboards.reply.transport_choice import transport_choice
 from loader import bot
 from states.help import HelpState
 from utils.api.yandex.info_def import get_station_list
-from keyboards.reply.transport_choice import transport_choice
 
 
 @bot.message_handler(commands=['stations'])
@@ -21,7 +22,7 @@ def set_transport(message: Message) -> None:
     bot.set_state(message.from_user.id, HelpState.transport, message.chat.id)
 
 
-@bot.message_handler(state=HelpState.transport, content_types='text')
+@bot.message_handler(state=HelpState.transport)
 def show_stations(message: Message) -> None:
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         if message.text == 'Самолеты':
@@ -55,7 +56,8 @@ def show_stations(message: Message) -> None:
                 text += f'\t\t{item['Станция']}\n'
             else:
                 text += '\n'
-        bot.send_message(message.from_user.id, text)
+        keyboard = ReplyKeyboardRemove()
+        bot.send_message(message.from_user.id, text, reply_markup=keyboard)
         bot.delete_state(message.from_user.id)
     else:
         bot.send_message(message.from_user.id, 'Что-то пошло не так, напишите название региона '

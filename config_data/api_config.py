@@ -4,7 +4,8 @@ import requests
 
 from config_data.config import (API_YANDEX_URL,
                                 API_YANDEX_KEY,
-                                STATION_LIST_ENDPOINT)
+                                STATION_LIST_ENDPOINT,
+                                NEAREST_STATION_ENDPOINT)
 
 
 def api_request(endpoint: str, params: Dict | None = None) -> requests.Response:
@@ -21,5 +22,16 @@ def api_request(endpoint: str, params: Dict | None = None) -> requests.Response:
 
 def get_all_stations() -> Dict:
     response = api_request(endpoint=STATION_LIST_ENDPOINT)
+    if response.status_code == requests.codes.ok:
+        return response.json()
+
+
+def nearest_stations(latitude: float, longitude: float, radius: int, transport_type: str) -> Dict:
+    params = {'lat': latitude,
+              'lng': longitude,
+              'distance': radius,
+              'transport_types': transport_type
+              }
+    response = api_request(endpoint=NEAREST_STATION_ENDPOINT, params=params)
     if response.status_code == requests.codes.ok:
         return response.json()

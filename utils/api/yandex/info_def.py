@@ -105,3 +105,13 @@ def get_code(obj: Dict, search_name: str) -> str:
                 for item in value:
                     if get_code(item, search_name):
                         return get_code(item, search_name)
+
+
+def get_nearest_station(obj: Dict) -> str:
+    text = ''
+    for item in obj['stations']:
+        text += (f'"{item['title']}":\n\t\t\t'
+                 f'Тип станции: {item['station_type_name']}\n\t\t\t'
+                 f'Расстояние до станции: {round(item['distance'])}км\n'
+                 f'{'-' * 40}\n\n')
+    return text

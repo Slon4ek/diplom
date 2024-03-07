@@ -2,4 +2,5 @@ from . import (survey,
                countries,
                regions,
                cities,
-               stations)
+               stations,
+               nearest_station)
