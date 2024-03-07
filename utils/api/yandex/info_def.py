@@ -113,5 +113,5 @@ def get_nearest_station(obj: Dict) -> str:
         text += (f'"{item['title']}":\n\t\t\t'
                  f'Тип станции: {item['station_type_name']}\n\t\t\t'
                  f'Расстояние до станции: {round(item['distance'])}км\n'
-                 f'{'-' * 40}\n\n')
+                 f'{'-' * 60}\n\n')
     return text

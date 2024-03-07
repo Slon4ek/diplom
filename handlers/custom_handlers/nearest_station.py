@@ -60,15 +60,19 @@ def get_search_radius(message: Message) -> None:
 @bot.message_handler(state=LocationState.get_radius)
 def show_nearest_stations(message: Message) -> None:
     if message.text.isdigit():
-        if 0 < int(message.text) < 50:
+        if 0 < int(message.text) < 51:
             with bot.retrieve_data(message.from_user.id) as data:
                 stations = nearest_stations(latitude=data['latitude'],
                                             longitude=data['longitude'],
                                             radius=int(message.text),
                                             transport_type=data['transport_type'])
                 text = get_nearest_station(stations)
-                bot.send_message(message.from_user.id, text)
-                bot.delete_state(message.from_user.id)
+                if text:
+                    bot.send_message(message.from_user.id, text)
+                    bot.delete_state(message.from_user.id)
+                else:
+                    bot.send_message(message.from_user.id, 'По вашем параметрам ни одной станции не найдено.')
+                    bot.delete_state(message.from_user.id)
         else:
             bot.send_message(message.from_user.id, 'Поддерживаемый радиус поиска от 0 до 50 км')
     else:
