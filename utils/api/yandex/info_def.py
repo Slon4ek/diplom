@@ -4,7 +4,8 @@ from typing import Dict, List
 def get_country_list(obj: Dict) -> List:
     """
     Функция возвращает список стран из словаря
-    :param obj: Dict
+    :param obj: словарь всех станций
+    :type obj: Dict
     :return: List
     """
     return [country['title'] for country in obj['countries'] if country['title']]
@@ -13,8 +14,10 @@ def get_country_list(obj: Dict) -> List:
 def get_region_list(obj: Dict, country_name: str) -> List:
     """
     Функция принимает словарь и название страны и возвращает список регионов этой страны
-    :param obj: Dict
-    :param country_name: str
+    :param obj: словарь всех станций
+    :type obj: Dict
+    :param country_name: название страны
+    :type country_name: str
     :return: List
     """
     if country_name in obj.values() and 'regions' in obj.keys():
@@ -33,9 +36,11 @@ def get_region_list(obj: Dict, country_name: str) -> List:
 def get_city_list(obj: Dict, region_name: str) -> List:
     """
     Функция принимает словарь и название региона страны и возвращает список городов данного региона
-    :param obj: Dict
+    :param obj: словарь всех станций
+    :type obj: Dict
     :param region_name: название региона
-    :return: список городов
+    :type region_name: str
+    :return: List
     """
     if region_name in obj.values() and 'settlements' in obj.keys():
         return [city['title'] for city in obj['settlements'] if city['title']]
@@ -55,10 +60,13 @@ def get_station_list(obj: Dict, city_name: str, transport_type: str | None = Non
     Функция принимает словарь и название города и возвращает словарь всех станций этого города
     где ключем является тип транспорта, а значение - список названий станций.
     Если передан параметр transport_type, то функция возвращает только станции для указанного транспорта
-    :param obj: Dict
+    :param obj: словарь всех станций
+    :type obj: Dict
     :param city_name: название города
+    :type city_name: str
     :param transport_type: название транспорта(необязательный параметр)
-    :return: список станций
+    :type transport_type: str | None
+    :return: Dict
     """
     if city_name in obj.values() and 'stations' in obj.keys():
         if transport_type:
@@ -91,8 +99,10 @@ def get_code(obj: Dict, search_name: str) -> str:
     Функция принимает словарь и название города или станции и возвращает его код в системе
     кодирования Яндекс Расписаний
     :param search_name: название города или станции
-    :param obj: Dict
-    :return: код станции
+    :type search_name: str
+    :param obj: словарь всех станций
+    :type obj: Dict
+    :return: str
     """
     if search_name.title() in obj.values():
         return obj['codes']['yandex_code']
@@ -108,6 +118,13 @@ def get_code(obj: Dict, search_name: str) -> str:
 
 
 def get_nearest_station(obj: Dict) -> str:
+    """
+    Функция принимает объект(словарь станций) и возвращает стоку содержащую название станции, тип станции и расстояние
+    до этой станции
+    :param obj: словарь всех станций
+    :type obj: Dict
+    :return: str
+    """
     text = ''
     for item in obj['stations']:
         text += (f'"{item['title']}":\n\t\t\t'

@@ -7,12 +7,24 @@ from states.help import HelpState
 
 @bot.message_handler(commands=['regions'])
 def get_regions(message: Message) -> None:
+    """
+    Функция запрашивает у пользователя название страны по которой нужно произвести поиск
+    :param message: команда /regions
+    :type message: Message
+    :return: None
+    """
     bot.set_state(message.from_user.id, HelpState.regions, message.chat.id)
     bot.send_message(message.from_user.id, 'Список регионов какой страны вы хотели бы посмотреть?')
 
 
 @bot.message_handler(state=HelpState.regions)
 def show_regions(message: Message) -> None:
+    """
+    Функция принимает от пользователя название страны, делает запрос к API Яндекс расписаний и выводит результат
+    :param message: название страны для поиска
+    :type message: Message
+    :return: None
+    """
     stations = get_all_stations()
     regions = get_region_list(stations, message.text)
     if regions:
