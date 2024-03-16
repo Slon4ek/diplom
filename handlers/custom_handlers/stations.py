@@ -1,6 +1,6 @@
 from telebot.types import Message, ReplyKeyboardRemove
 
-from config_data.api_config import get_all_stations
+from config_data.api_config import get_all_data
 from keyboards.reply.transport_choice import transport_choice
 from loader import bot
 from states.help import HelpState
@@ -57,7 +57,7 @@ def show_stations(message: Message) -> None:
             bot.send_message(message.from_user.id, 'Ой! Такого я не знаю :( '
                                                    'Введите вид транспорта или нажмите на кнопочку')
             return
-    stations = get_all_stations()
+    stations = get_all_data()
     stations_list = get_station_list(stations, data['city'], data['transport_type'])
     if stations_list:
         text = ''
