@@ -201,7 +201,7 @@ def schedule_in_station(obj: Dict) -> str:
                               f'\t >> Перевозчик: {item['thread']['carrier']['title']}\n'
                               f'\t >> Время отправления: \n{departure}'
                               f'\t >> Дни курсирования: {item['days']}\n'
-                              f'{'-'*75}\n\n')
+                              f'{'-' * 75}\n\n')
 
         return schedule_text
     except TypeError:

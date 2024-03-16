@@ -78,5 +78,5 @@ def show_stations(message: Message) -> None:
         bot.send_message(message.from_user.id, text, reply_markup=keyboard)
         bot.delete_state(message.from_user.id)
     else:
-        bot.send_message(message.from_user.id, 'Что-то пошло не так, напишите название региона '
+        bot.send_message(message.from_user.id, 'Что-то пошло не так, напишите название города '
                                                'точно как в списке стран из команды /cities')

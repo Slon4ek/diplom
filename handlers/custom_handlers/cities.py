@@ -1,7 +1,7 @@
 from telebot.types import Message
 from config_data.api_config import get_all_data
 from loader import bot
-from utils.api.yandex.info_def import get_city_list
+from utils.api.yandex.info_def import get_city_list, get_all_regions
 from states.help import HelpState
 
 
@@ -25,8 +25,13 @@ def show_cities(message: Message) -> None:
     :type message: Message
     :return: None
     """
-    stations = get_all_data()
-    cities = get_city_list(stations, message.text)
+    all_data = get_all_data()
+    regions = get_all_regions(all_data)
+    region_name = ''
+    for key, region in regions.items():
+        if message.text.lower() == region.lower():
+            region_name = region
+    cities = get_city_list(all_data, region_name)
     if cities:
         cities = cities.values()
         bot.send_message(message.from_user.id, '\n'.join(cities))

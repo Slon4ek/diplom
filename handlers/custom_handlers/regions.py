@@ -1,7 +1,7 @@
 from telebot.types import Message
 from config_data.api_config import get_all_data
 from loader import bot
-from utils.api.yandex.info_def import get_region_list
+from utils.api.yandex.info_def import get_region_list, get_all_countries
 from states.help import HelpState
 
 
@@ -26,7 +26,12 @@ def show_regions(message: Message) -> None:
     :return: None
     """
     stations = get_all_data()
-    regions = get_region_list(stations, message.text)
+    countries = get_all_countries(stations)
+    country_name = ''
+    for key, country in countries.items():
+        if message.text.lower() == country.lower():
+            country_name = country
+    regions = get_region_list(stations, country_name)
     if regions:
         regions = regions.values()
         bot.send_message(message.from_user.id, '\n'.join(regions))
