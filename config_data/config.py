@@ -11,13 +11,15 @@ API_YANDEX_KEY = os.getenv("API_YANDEX_KEY")
 API_YANDEX_URL = 'https://api.rasp.yandex.net/'
 STATION_LIST_ENDPOINT = 'v3.0/stations_list/'
 NEAREST_STATION_ENDPOINT = 'v3.0/nearest_stations/'
-DB_PATH = 'database/database.db'
+FROMTO_ENDPOINT = 'v3.0/search/'
+INSTATION_ENDPOINT = 'v3.0/schedule/'
+DB_PATH = 'database.db'
 DEFAULT_COMMANDS = (
     ("start", "Запустить бота"),
     ("help", "Вывести справку"),
     ("nearest_station", "Поиск ближайшей станции"),
     # ("fromto", "Расписание рейсов между станциями"),
-    # ("instation", "Расписание рейсов по станции"),
+    ("instation", "Расписание рейсов по станции"),
     ("countries", "Список стран"),
     ("regions", "Список регионов"),
     ("cities", "Список городов"),

@@ -92,8 +92,13 @@ def show_nearest_stations(message: Message) -> None:
                                             transport_type=data['transport_type'])
                 text = get_nearest_station(stations)
             if text:
-                bot.send_message(message.from_user.id, text)
-                bot.delete_state(message.from_user.id)
+                if len(text) > 4096:
+                    for txt in range(0, len(text), 4096):
+                        bot.send_message(message.from_user.id, '{}'.format(text[txt: txt + 4096]))
+                else:
+                    bot.edit_message_text(chat_id=message.chat.id,
+                                          message_id=message.message_id,
+                                          text=text)
             else:
                 bot.send_message(message.from_user.id, 'По вашем параметрам ни одной станции не найдено.')
                 bot.delete_state(message.from_user.id)

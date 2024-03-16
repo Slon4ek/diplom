@@ -1,5 +1,5 @@
 from telebot.types import Message
-from config_data.api_config import get_all_stations
+from config_data.api_config import get_all_data
 from loader import bot
 from utils.api.yandex.info_def import get_city_list
 from states.help import HelpState
@@ -25,10 +25,10 @@ def show_cities(message: Message) -> None:
     :type message: Message
     :return: None
     """
-    stations = get_all_stations()
+    stations = get_all_data()
     cities = get_city_list(stations, message.text)
     if cities:
-        cities = sorted(cities)
+        cities = cities.values()
         bot.send_message(message.from_user.id, '\n'.join(cities))
         bot.delete_state(message.from_user.id)
     else:
