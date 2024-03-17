@@ -1,14 +1,13 @@
 from typing import Dict
 
-from config_data.api_config import get_all_data
-
-all_data = get_all_data()
+from loguru import logger
 
 
+@logger.catch
 def get_all_countries(obj: Dict) -> Dict:
     """
     Функция возвращает словарь, где ключем является яндекс код страны, а значением название страны
-    :param obj: словарь всех станций
+    :param obj: JSON всей информации по станциям
     :return: Dict
     """
     all_countries = {country['codes']['yandex_code']: country['title']
@@ -18,10 +17,11 @@ def get_all_countries(obj: Dict) -> Dict:
     return dict(sorted_countries)
 
 
+@logger.catch
 def get_all_regions(obj: Dict) -> Dict:
     """
     Функция возвращает словарь всех доступных регионов(ключ - яндекс код, значение - название региона)
-    :param obj: словарь всех станций
+    :param obj: JSON всей информации по станциям
     :type obj: Dict
     :return: Словарь всех доступных регионов
     """
@@ -35,10 +35,11 @@ def get_all_regions(obj: Dict) -> Dict:
     return dict(sorted_regions)
 
 
+@logger.catch
 def get_all_cities(obj: Dict) -> Dict:
     """
     Функция возвращает словарь всех доступных городов(ключ - яндекс код, значение - название города)
-    :param obj: словарь всех станций
+    :param obj: JSON всей информации по станциям
     :type obj: Dict
     :return: Словарь всех доступных городов
     """
@@ -53,7 +54,14 @@ def get_all_cities(obj: Dict) -> Dict:
     return dict(sorted_cities)
 
 
+@logger.catch
 def get_all_stations(obj: Dict) -> Dict:
+    """
+    Функция возвращает словарь всех доступных станций(ключ - яндекс код, значение - название станции)
+    :param obj: JSON всей информации по станциям
+    :type obj: Dict
+    :return: Словарь всех доступных станций
+    """
     all_stations = dict()
     if 'stations' in obj.keys():
         for station in obj['stations']:
@@ -72,10 +80,11 @@ def get_all_stations(obj: Dict) -> Dict:
     return all_stations
 
 
-def get_region_list(obj: Dict, country_name: str) -> Dict:
+@logger.catch
+def get_region_in_country(obj: Dict, country_name: str) -> Dict:
     """
     Функция принимает словарь и название страны и возвращает список регионов этой страны
-    :param obj: словарь всех станций
+    :param obj: JSON всей информации по станциям
     :type obj: Dict
     :param country_name: название страны
     :type country_name: str
@@ -92,18 +101,19 @@ def get_region_list(obj: Dict, country_name: str) -> Dict:
     else:
         for value in obj.values():
             if isinstance(value, dict):
-                if get_region_list(value, country_name):
-                    return get_region_list(value, country_name)
+                if get_region_in_country(value, country_name):
+                    return get_region_in_country(value, country_name)
             if isinstance(value, list):
                 for item in value:
-                    if get_region_list(item, country_name):
-                        return get_region_list(item, country_name)
+                    if get_region_in_country(item, country_name):
+                        return get_region_in_country(item, country_name)
 
 
-def get_city_list(obj: Dict, region_name: str) -> Dict:
+@logger.catch
+def get_city_in_region(obj: Dict, region_name: str) -> Dict:
     """
     Функция принимает словарь и название региона страны и возвращает список городов данного региона
-    :param obj: словарь всех станций
+    :param obj: JSON всей информации по станциям
     :type obj: Dict
     :param region_name: название региона
     :type region_name: str
@@ -118,20 +128,21 @@ def get_city_list(obj: Dict, region_name: str) -> Dict:
     else:
         for value in obj.values():
             if isinstance(value, dict):
-                if get_city_list(value, region_name):
-                    return get_city_list(value, region_name)
+                if get_city_in_region(value, region_name):
+                    return get_city_in_region(value, region_name)
             if isinstance(value, list):
                 for item in value:
-                    if get_city_list(item, region_name):
-                        return get_city_list(item, region_name)
+                    if get_city_in_region(item, region_name):
+                        return get_city_in_region(item, region_name)
 
 
-def get_station_list(obj: Dict, city_name: str, transport_type: str | None = None) -> Dict:
+@logger.catch
+def get_station_in_city(obj: Dict, city_name: str, transport_type: str | None = None) -> Dict:
     """
     Функция принимает словарь и название города и возвращает словарь всех станций этого города
     где ключем является тип транспорта, а значение - список названий станций.
     Если передан параметр transport_type, то функция возвращает только станции для указанного транспорта
-    :param obj: словарь всех станций
+    :param obj: JSON всей информации по станциям
     :type obj: Dict
     :param city_name: название города
     :type city_name: str
@@ -157,19 +168,20 @@ def get_station_list(obj: Dict, city_name: str, transport_type: str | None = Non
     else:
         for value in obj.values():
             if isinstance(value, dict):
-                if get_station_list(value, city_name, transport_type):
-                    return get_station_list(value, city_name, transport_type)
+                if get_station_in_city(value, city_name, transport_type):
+                    return get_station_in_city(value, city_name, transport_type)
             if isinstance(value, list):
                 for item in value:
-                    if get_station_list(item, city_name, transport_type):
-                        return get_station_list(item, city_name, transport_type)
+                    if get_station_in_city(item, city_name, transport_type):
+                        return get_station_in_city(item, city_name, transport_type)
 
 
-def get_nearest_station(obj: Dict) -> str:
+@logger.catch
+def nearest_station_text(obj: Dict) -> str:
     """
     Функция принимает объект(словарь станций) и возвращает стоку содержащую название станции, тип станции и расстояние
     до этой станции
-    :param obj: словарь всех станций
+    :param obj: JSON всей информации по станциям
     :type obj: Dict
     :return: str
     """
@@ -182,33 +194,45 @@ def get_nearest_station(obj: Dict) -> str:
     return text
 
 
-def schedule_in_station(obj: Dict) -> str:
+@logger.catch
+def schedule_in_station_text(obj: Dict) -> str:
+    """
+    Функция возвращает расписание движения транспорта
+    :param obj: JSON всей информации по станциям
+    :return: текст
+    """
     try:
-        schedule_text = (f'Выбранная дата: {obj['date']}\n'
-                         f'Информация о станции:\n'
-                         f'\t\t__Название станции: {obj['station']['title']}__\n'
-                         f'\t\t__Тип станции: {obj['station']['station_type_name']}__\n'
-                         f'Расписание движения транспорта:\n\n')
+        schedule_text = (f'<b>Выбранная дата:</b> <i>{obj['date']}</i>\n'
+                         f'<b>Информация о станции:</b>\n'
+                         f'\t\t<b>Название станции:</b> <i>{obj['station']['title']}</i>\n'
+                         f'\t\t<b>Тип станции:</b> <i>{obj['station']['station_type_name']}</i>\n'
+                         f'<b><u>Расписание движения транспорта:</u></b>\n\n')
         for item in obj['schedule']:
             if item['departure']:
-                departure = (f'\t >> Дата: {item['departure'][:10]}\n'
-                             f'\t >> Время: {item['departure'][14:19]}\n'
-                             f'\t >> Часовой пояс: {item['departure'][19:]}\n')
+                departure = (f'\t >> <i>Время: {item['departure'][14:19]}</i>\n'
+                             f'\t >> <i>Часовой пояс: {item['departure'][19:]}</i>\n')
             else:
                 departure = f'\t >> Не определено\n'
-            schedule_text += (f'\t >> Номер: {item['thread']['number']}\n'
-                              f'\t >> Направление: {item['thread']['title']}\n'
-                              f'\t >> Перевозчик: {item['thread']['carrier']['title']}\n'
-                              f'\t >> Время отправления: \n{departure}'
-                              f'\t >> Дни курсирования: {item['days']}\n'
-                              f'{'-' * 75}\n\n')
+            schedule_text += (f'\t >> <b>Номер рейса:</b> <i>{item['thread']['number']}</i>\n'
+                              f'\t >> <b>Направление:</b> <i>{item['thread']['title']}</i>\n'
+                              f'\t >> <b>Перевозчик:</b> <i>{item['thread']['carrier']['title']}</i>\n'
+                              f'\t >> <b>Время отправления:</b>\n{departure}'
+                              f'\t >> <b>Дни курсирования:</b> <i>{item['days']}</i>\n'
+                              f'{'-' * 75}\n*')
 
         return schedule_text
     except TypeError:
-        return 'Что-то пошло не так, видимо Яндекс пока не знает расписания по вашему запросу :('
+        return 'Что-то пошло не так, видимо в системе Яндекс Расписаний нет информации по вашему запросу :('
 
 
-def get_transport(obj, city_name):
+@logger.catch
+def get_transport(obj: Dict, city_name: str) -> set:
+    """
+    Функция возвращает виды транспорта доступного в выбранном городе
+    :param obj: JSON всей информации по станциям
+    :param city_name: название города
+    :return: set
+    """
     if city_name in obj.values() and 'stations' in obj.keys():
         transport_types = [station['transport_type']
                            for station in obj['stations']]

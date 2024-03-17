@@ -1,21 +1,23 @@
+from loguru import logger
 from telebot.types import Message, ReplyKeyboardRemove
 
+from config_data.api_config import get_nearest_stations
 from keyboards.reply.location import request_location
 from keyboards.reply.transport_choice import transport_choice
 from loader import bot
 from states.location_state import LocationState
-from config_data.api_config import nearest_stations
-from utils.api.yandex.info_def import get_nearest_station
+from utils.api.yandex.info_def import nearest_station_text
 
 
 @bot.message_handler(commands=['nearest_station'])
-def get_coordinates(message: Message) -> None:
+def set_coordinates(message: Message) -> None:
     """
     Функция запрашивает у пользователя координаты его местоположения
     :param message: команда /nearest_station
     :type message: Message
     :return: None
     """
+    logger.info(f'Пользователь {message.from_user.id} запустил команду /nearest_station')
     bot.send_message(message.from_user.id, 'Чтобы найти ближайшие станции мне нужны ваши координаты.'
                                            'Отправьте их нажав на кнопку "Отправить местонахождение"',
                      reply_markup=request_location())
@@ -23,7 +25,7 @@ def get_coordinates(message: Message) -> None:
 
 
 @bot.message_handler(content_types=['text', 'location'], state=LocationState.get_location)
-def get_transport_type(message: Message) -> None:
+def set_transport_type(message: Message) -> None:
     """
     Функция сохраняет координаты пользователя и запрашивает вид транспорта по которому нужно сделать запрос
     :param message: координаты местоположения пользователя
@@ -31,6 +33,7 @@ def get_transport_type(message: Message) -> None:
     :return: None
     """
     if message.content_type == 'location':
+        logger.info(f'Пользователь {message.from_user.id} отправил свои координаты')
         with bot.retrieve_data(message.from_user.id) as data:
             data['latitude'] = message.location.latitude
             data['longitude'] = message.location.longitude
@@ -41,17 +44,19 @@ def get_transport_type(message: Message) -> None:
                          reply_markup=transport_choice())
         bot.set_state(message.from_user.id, LocationState.transport_type)
     else:
+        logger.error(f'Пользователь {message.from_user.id} не отправил свои координаты')
         bot.send_message(message.from_user.id, 'Без ваших координат я не смогу помочь :(')
 
 
 @bot.message_handler(state=LocationState.transport_type)
-def get_search_radius(message: Message) -> None:
+def set_search_radius(message: Message) -> None:
     """
     Функция сохраняет вид транспорта введенный пользователем и запрашивает радиус поиска
     :param message: вид транспорта
     :type message: Message
     :return: None
     """
+    logger.info(f'Выбор транспорта пользователем {message.from_user.id}: {message.text}')
     with bot.retrieve_data(message.from_user.id) as data:
         if message.text == 'Самолеты':
             data['transport_type'] = 'plane'
@@ -83,14 +88,15 @@ def show_nearest_stations(message: Message) -> None:
     :type message: Message
     :return: None
     """
+    logger.info(f'Пользователь {message.from_user.id} ввел радиус: {message.text}')
     if message.text.isdigit():
         if 0 < int(message.text) < 51:
             with bot.retrieve_data(message.from_user.id) as data:
-                stations = nearest_stations(latitude=data['latitude'],
-                                            longitude=data['longitude'],
-                                            radius=int(message.text),
-                                            transport_type=data['transport_type'])
-                text = get_nearest_station(stations)
+                stations = get_nearest_stations(latitude=data['latitude'],
+                                                longitude=data['longitude'],
+                                                radius=int(message.text),
+                                                transport_type=data['transport_type'])
+                text = nearest_station_text(stations)
             if text:
                 if len(text) > 4096:
                     for txt in range(0, len(text), 4096):
@@ -103,7 +109,6 @@ def show_nearest_stations(message: Message) -> None:
                 bot.send_message(message.from_user.id, 'По вашем параметрам ни одной станции не найдено.')
                 bot.delete_state(message.from_user.id)
         else:
-            bot.send_message(message.from_user.id, 'Поддерживаемый радиус поиска от 0 до 50 км')
+            bot.send_message(message.from_user.id, 'Поддерживаемый радиус поиска от 1 до 50 км')
     else:
-        bot.send_message(message.from_user.id, 'Ошибка: Введите число!')
-
+        bot.send_message(message.from_user.id, 'Ошибка: Должно быть целое число от 1 до 50')

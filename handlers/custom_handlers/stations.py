@@ -1,20 +1,22 @@
+from loguru import logger
 from telebot.types import Message, ReplyKeyboardRemove
 
-from config_data.api_config import get_all_data
+from config_data.api_config import ALL_DATA
 from keyboards.reply.transport_choice import transport_choice
 from loader import bot
 from states.help import HelpState
-from utils.api.yandex.info_def import get_station_list
+from utils.api.yandex.info_def import get_station_in_city
 
 
 @bot.message_handler(commands=['stations'])
-def set_city(message: Message) -> None:
+def set_city_name(message: Message) -> None:
     """
     Функция запрашивает у пользователя название города для поиска
     :param message: команда /stations
     :type message: Message
     :return: None
     """
+    logger.info(f'Пользователь {message.from_user.id} запустил команду /stations')
     bot.set_state(message.from_user.id, HelpState.city_choice, message.chat.id)
     bot.send_message(message.from_user.id, 'Список станций какого города вы хотели бы посмотреть?')
 
@@ -27,6 +29,7 @@ def set_transport(message: Message) -> None:
     :type message: Message
     :return: None
     """
+    logger.info(f'Пользователь {message.from_user.id} ввел название города: {message.text}')
     bot.send_message(message.from_user.id, 'Какой вид транспорта вас интересует?',
                      reply_markup=transport_choice())
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
@@ -42,6 +45,7 @@ def show_stations(message: Message) -> None:
     :type message: Message
     :return: None
     """
+    logger.info(f'Пользователь {message.from_user.id} выбрал вид транспорта: {message.text}')
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         if message.text == 'Самолеты':
             data['transport_type'] = 'plane'
@@ -57,8 +61,7 @@ def show_stations(message: Message) -> None:
             bot.send_message(message.from_user.id, 'Ой! Такого я не знаю :( '
                                                    'Введите вид транспорта или нажмите на кнопочку')
             return
-    stations = get_all_data()
-    stations_list = get_station_list(stations, data['city'], data['transport_type'])
+    stations_list = get_station_in_city(ALL_DATA, data['city'], data['transport_type'])
     if stations_list:
         text = ''
         for key, val in stations_list.items():
@@ -78,5 +81,6 @@ def show_stations(message: Message) -> None:
         bot.send_message(message.from_user.id, text, reply_markup=keyboard)
         bot.delete_state(message.from_user.id)
     else:
+        logger.error(f'Неверно указан город {data['city']}')
         bot.send_message(message.from_user.id, 'Что-то пошло не так, напишите название города '
                                                'точно как в списке стран из команды /cities')

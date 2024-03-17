@@ -1,8 +1,17 @@
+from loguru import logger
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+
 from utils.api.yandex.info_def import get_transport
 
 
+@logger.catch
 def create_transport_keyboard(all_data, city_name):
+    """
+    Функция создает и возвращает Inline клавиатуру с видами транспорта доступными в выбранном городе
+    :param all_data: общая информация по всем станциям
+    :param city_name: название города
+    :return: InlineKeyboardMarkup
+    """
     transport_types = get_transport(all_data, city_name)
     transport_types_dict = dict()
     for t_type in transport_types:
