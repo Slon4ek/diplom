@@ -15,7 +15,7 @@ all_stations = get_all_stations(ALL_DATA)
 user_choice = dict()  # словарь для записи данных от пользователя
 
 
-@bot.message_handler(commands=['instation'])
+@bot.message_handler(commands=['in_station'])
 def set_country_interval(message: Message) -> None:
     """
     Функция предлагает пользователю выбрать интервал в зависимости от первой буквы названия страны
@@ -164,40 +164,49 @@ def set_date(call: CallbackQuery) -> None:
     logger.info(f'Выбор станции пользователем {user_id}: {station}')
     user_choice[user_id]['station'] = station
     user_choice[user_id]['station_code'] = call.data
-    calendar, step = DetailedTelegramCalendar(locale='ru').build()
+    calendar, step = DetailedTelegramCalendar(locale='ru', calendar_id=1).build()
     bot.edit_message_text(chat_id=call.message.chat.id,
                           message_id=call.message.message_id,
                           text='Укажите дату',
                           reply_markup=calendar)
 
 
-@bot.callback_query_handler(func=DetailedTelegramCalendar.func())
+@bot.callback_query_handler(func=DetailedTelegramCalendar.func(calendar_id=1))
 def get_station_schedule(call: CallbackQuery):
     """
     Функция обрабатывает всю полученную информацию, записывает ее в базу данных для хранения запросов
     и отправляет пользователю сообщение содержащее информацию по его запросу
     """
     user_id = call.from_user.id
-    result, key, step = DetailedTelegramCalendar(locale='ru').process(call.data)
+    result, key, step = DetailedTelegramCalendar(locale='ru', calendar_id=1).process(call.data)
     if not result and key:
         bot.edit_message_text(chat_id=call.message.chat.id,
                               message_id=call.message.message_id,
                               text=f'Выбрать {LSTEP[step]}',
                               reply_markup=key)
     elif result:
+        logger.info(f'Выбор даты пользователем {user_id}: {result}')
         user_choice[user_id]['schedule_date'] = result
         request = InstationRequest(**user_choice[user_id])
         request.save()
         schedule = get_schedule_in_station(user_choice[user_id]['station_code'], result)
-        text = schedule_in_station_text(schedule)
-        logger.info(f'Выбор даты пользователем {user_id}: {result}')
-        text = text.split('*')
-        message = ''
-        for item in text:
-            if len(message) < 4096 and len(message) + len(item) < 4096:
-                message += item
-                if len(message) + len(item) > 4095:
-                    bot.send_message(call.message.chat.id, message, parse_mode='HTML')
+        all_text = schedule_in_station_text(schedule)
+        text = all_text.split('*')
+        if len(all_text) < 4096:
+            bot.edit_message_text(chat_id=call.message.chat.id,
+                                  message_id=call.message.message_id,
+                                  text='\n'.join(text),
+                                  parse_mode='HTML')
+        else:
+            bot.delete_message(chat_id=call.message.chat.id,
+                               message_id=call.message.message_id)
+            message = ''
+            for item in text:
+                if len(message) + len(item) < 4096:
+                    message += item
+                else:
+                    bot.send_message(user_id, message, parse_mode='HTML')
+                    message = item
             else:
-                message = ' '
-                continue
+                if len(message) > 0:
+                    bot.send_message(user_id, message, parse_mode='HTML')
