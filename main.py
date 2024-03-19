@@ -1,7 +1,7 @@
 from loguru import logger
 from requests import ConnectTimeout
 from telebot.custom_filters import StateFilter
-from urllib3.exceptions import MaxRetryError
+from telebot.apihelper import ApiException
 
 import handlers  # noqa
 from database.database_class import create_models
@@ -17,6 +17,6 @@ if __name__ == "__main__":
         bot.add_custom_filter(StateFilter(bot))
         set_default_commands(bot)
         bot.infinity_polling()
-    except (MaxRetryError, ConnectTimeout) as exc:
+    except ApiException as exc:
         logger.error(exc)
 

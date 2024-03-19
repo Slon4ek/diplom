@@ -10,7 +10,7 @@ from utils.api.yandex.info_def import get_region_in_country, get_all_countries
 @bot.message_handler(commands=['regions'])
 def set_country_name(message: Message) -> None:
     """
-    Функция запрашивает у пользователя название страны по которой нужно произвести поиск
+    Функция запрашивает у пользователя название страны по которой нужно произвести поиск регионов
     :param message: команда /regions
     :type message: Message
     :return: None
@@ -23,7 +23,8 @@ def set_country_name(message: Message) -> None:
 @bot.message_handler(state=HelpState.regions)
 def show_regions(message: Message) -> None:
     """
-    Функция принимает от пользователя название страны, делает запрос к API Яндекс расписаний и выводит результат
+    Функция принимает от пользователя название страны, делает запрос к API Яндекс расписаний и выводит
+    список регионов этой страны
     :param message: название страны для поиска
     :type message: Message
     :return: None
