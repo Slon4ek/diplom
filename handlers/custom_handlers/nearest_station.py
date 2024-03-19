@@ -98,17 +98,26 @@ def show_nearest_stations(message: Message) -> None:
                                                 transport_type=data['transport_type'])
                 text = nearest_station_text(stations)
             if text:
-                if len(text) > 4096:
-                    for txt in range(0, len(text), 4096):
-                        bot.send_message(message.from_user.id, '{}'.format(text[txt: txt + 4096]))
+                if len(text) < 4096:
+                    bot.send_message(message.from_user.id, text)
                 else:
-                    bot.edit_message_text(chat_id=message.chat.id,
-                                          message_id=message.message_id,
-                                          text=text)
+                    send_message = ''
+                    for item in text:
+                        if len(send_message) + len(item) < 4096:
+                            send_message += item
+                        else:
+                            bot.send_message(message.from_user.id, send_message)
+                            send_message = item
+                    else:
+                        if len(send_message) > 0:
+                            bot.send_message(message.from_user.id, send_message)
             else:
                 bot.send_message(message.from_user.id, 'По вашем параметрам ни одной станции не найдено.')
-                bot.delete_state(message.from_user.id)
         else:
             bot.send_message(message.from_user.id, 'Поддерживаемый радиус поиска от 1 до 50 км')
+            return
     else:
         bot.send_message(message.from_user.id, 'Ошибка: Должно быть целое число от 1 до 50')
+        return
+
+    bot.delete_state(message.from_user.id)

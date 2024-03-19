@@ -20,10 +20,12 @@ def set_region_name(message: Message) -> None:
     bot.send_message(message.from_user.id, 'Список городов какого региона вы хотели бы посмотреть?')
 
 
+@logger.catch
 @bot.message_handler(state=HelpState.city, content_types='text')
 def show_cities(message: Message) -> None:
     """
-    Функция принимает от пользователя название региона, делает запрос к API Яндекс расписаний и выводит результат
+    Функция принимает от пользователя название региона, делает запрос к API Яндекс расписаний и выводит
+    список городов данного региона
     :param message: текст пользователя
     :type message: Message
     :return: None
@@ -34,8 +36,8 @@ def show_cities(message: Message) -> None:
     for key, region in regions.items():
         if message.text.lower() == region.lower():
             region_name = region
-    cities = get_city_in_region(ALL_DATA, region_name)
-    if cities:
+    if region_name:
+        cities = get_city_in_region(ALL_DATA, region_name)
         cities = cities.values()
         bot.send_message(message.from_user.id, '\n'.join(cities))
         bot.delete_state(message.from_user.id)

@@ -197,6 +197,7 @@ def get_station_schedule(call: CallbackQuery):
                                   message_id=call.message.message_id,
                                   text='\n'.join(text),
                                   parse_mode='HTML')
+            bot.send_message(user_id, f'Найдено {len(text) - 1} рейсов соответствующих указанным данным')
         else:
             bot.delete_message(chat_id=call.message.chat.id,
                                message_id=call.message.message_id)
@@ -210,3 +211,4 @@ def get_station_schedule(call: CallbackQuery):
             else:
                 if len(message) > 0:
                     bot.send_message(user_id, message, parse_mode='HTML')
+                    bot.send_message(user_id, f'Найдено {len(text) - 1} рейсов соответствующих указанным данным')

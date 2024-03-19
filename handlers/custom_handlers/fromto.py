@@ -179,6 +179,7 @@ def show_schedule_between_stations(call: CallbackQuery) -> None:
                               message_id=call.message.message_id,
                               text='\n'.join(text),
                               parse_mode='HTML')
+        bot.send_message(user_id, f'Найдено {len(text) - 1} рейсов соответствующих указанным данным')
     else:
         bot.delete_message(chat_id=call.message.chat.id,
                            message_id=call.message.message_id)
@@ -192,4 +193,5 @@ def show_schedule_between_stations(call: CallbackQuery) -> None:
         else:
             if len(message) > 0:
                 bot.send_message(user_id, message, parse_mode='HTML')
+                bot.send_message(user_id, f'Найдено {len(text) - 1} рейсов соответствующих указанным данным')
     bot.delete_state(user_id)
