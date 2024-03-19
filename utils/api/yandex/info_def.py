@@ -246,3 +246,50 @@ def get_transport(obj: Dict, city_name: str) -> set:
                 for item in value:
                     if get_transport(item, city_name):
                         return get_transport(item, city_name)
+
+
+@logger.catch
+def get_transport_between_stations(obj: Dict) -> set:
+    """
+    Функция возвращает список доступного транспорта между выбранными пунктами
+    :param obj: JSON объект содержащий всю информацию о доступных рейсах между выбранными пунктами
+    :return: set доступных видов транспорта
+    """
+    transport_types = []
+    for segment in obj['segments']:
+        transport_types.append(segment['from']['transport_type'])
+        transport_types.append(segment['to']['transport_type'])
+
+    return set(transport_types)
+
+
+@logger.catch
+def schedule_between_station_text(obj: Dict) -> str:
+    """
+    Функция возвращает в текстовом виде информацию по рейсам между выбранными пунктами
+    :param obj: JSON объект содержащий всю информацию о доступных рейсах между выбранными пунктами
+    :return: текст расписания
+    """
+    text = (f'<b>Выбранная дата:</b> <i>{obj['search']['date']}</i>\n'
+            f'<b>Пункт отправления:</b> <i>{obj['search']['from']['title']}</i>\n'
+            f'<b>Пункт прибытия:</b> <i>{obj['search']['to']['title']}</i>\n'
+            f'<b>Расписание:</b>\n\n')
+
+    for segment in obj['segments']:
+        travel_time = (f'{str(int(segment['duration']) // 3600)}ч. '
+                       f'{str(round((int(segment['duration']) % 3600) / 60))}мин.')
+        departure_time = (f'\t >> <i>Время: {segment['departure'][11:19]}</i>\n'
+                          f'\t >> <i>Часовой пояс: {segment['departure'][19:]}</i>\n')
+        arrival_time = (f'\t >> <i>Время: {segment['arrival'][11:19]}</i>\n'
+                        f'\t >> <i>Часовой пояс: {segment['arrival'][19:]}</i>\n')
+        text += (f'<b>Номер рейса:</b> {segment['thread']['number']}\n'
+                 f'<b>Направление:</b> {segment['thread']['title']}\n'
+                 f'<b>Перевозчик:</b> {segment['thread']['carrier']['title']}\n'
+                 f'<b>Название транспортного средства:</b> {segment['thread']['vehicle']}\n'
+                 f'<b>Станция отправления:</b> {segment['from']['title']}\n'
+                 f'<b>Станция прибытия:</b> {segment['to']['title']}\n'
+                 f'<b>Время в пути:</b> {travel_time}\n'
+                 f'<b>Время отправления:</b>\n{departure_time}'
+                 f'<b>Время прибытия:</b>\n{arrival_time}'
+                 f'{'-' * 75}\n*')
+    return text
